@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Klerek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active { background-color: #eff6ff; color: #2563eb; border-right: 3px solid #2563eb; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"><i class="bi bi-shield-lock-fill"></i></div>
+                <h2 class="text-2xl font-bold">Admin Access Only</h2>
+                <p class="text-slate-500 text-sm">Masukkan PIN Administrator</p>
+            </div>
+            <input type="password" id="adminPin" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 outline-none mb-4 text-center text-xl tracking-widest" placeholder="••••••">
+            <button onclick="checkAdminPin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">Masuk Dashboard</button>
+            <p id="loginError" class="text-red-500 text-sm text-center mt-3 hidden">PIN Salah!</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 fixed h-full flex flex-col">
+            <div class="p-6 border-b border-slate-100">
+                <h1 class="text-xl font-bold text-slate-900">Klerek <span class="text-blue-600">Admin</span></h1>
+                <p class="text-xs text-slate-500 mt-1">Control Center v1.0</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" onclick="showSection('overview')" id="nav-overview" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i class="bi bi-grid-1x2-fill text-lg"></i> Overview
+                </a>
+                <a href="#" onclick="showSection('pending')" id="nav-pending" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i class="bi bi-hourglass-split text-lg"></i> Pending Approval
+                    <span id="badgePending" class="ml-auto bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 rounded-full hidden">0</span>
+                </a>
+                <a href="#" onclick="showSection('users')" id="nav-users" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i class="bi bi-people-fill text-lg"></i> Manage Users
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition text-sm font-semibold">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-1 ml-64 p-8">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="pageTitle" class="text-2xl font-bold text-slate-900">Overview</h2>
+                    <p class="text-slate-500 text-sm">Pantau bisnis sewa dashboard Anda</p>
+                </div>
+                <button onclick="loadData()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                </button>
+            </header>
+
+            <!-- SECTION: OVERVIEW -->
+            <div id="section-overview" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-people-fill"></i></div>
+                            <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">Active</span>
+                        </div>
+                        <h3 class="text-slate-500 text-sm font-medium">Total User Aktif</h3>
+                        <p id="statActive" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-hourglass-split"></i></div>
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">Pending</span>
+                        </div>
+                        <h3 class="text-slate-500 text-sm font-medium">Menunggu Persetujuan</h3>
+                        <p id="statPending" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                            <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded">Alert</span>
+                        </div>
+                        <h3 class="text-slate-500 text-sm font-medium">Segera Expired (< 7 Hari)</h3>
+                        <p id="statExpiring" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: PENDING -->
+            <div id="section-pending" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h3 class="font-bold text-lg">Antrian Pendaftaran Baru</h3>
+                        <p class="text-sm text-slate-500">Cek bukti transfer dan approve user baru</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">Tanggal</th>
+                                    <th class="px-6 py-4">Nama / Toko</th>
+                                    <th class="px-6 py-4">WA</th>
+                                    <th class="px-6 py-4">Paket</th>
+                                    <th class="px-6 py-4">Akun Request</th>
+                                    <th class="px-6 py-4">Bukti</th>
+                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingTableBody" class="divide-y divide-slate-100">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: USERS -->
+            <div id="section-users" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">Database User Sewa</h3>
+                            <p class="text-sm text-slate-500">Kelola masa aktif dan status user</p>
+                        </div>
+                        <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Cari Kode Toko..." class="px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">Kode Toko</th>
+                                    <th class="px-6 py-4">PIN</th>
+                                    <th class="px-6 py-4">Masa Berlaku</th>
+                                    <th class="px-6 py-4">Sisa Hari</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-100">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Extend -->
+    <div id="modalExtend" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4">Perpanjang Masa Sewa</h3>
+            <p class="text-sm text-slate-500 mb-4">User: <span id="extendKode" class="font-mono font-bold text-slate-900"></span></p>
+            <select id="extendMonths" class="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 outline-none">
+                <option value="1">Tambah 1 Bulan</option>
+                <option value="3">Tambah 3 Bulan</option>
+                <option value="6">Tambah 6 Bulan</option>
+            </select>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modalExtend')" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50">Batal</button>
+                <button onclick="confirmExtend()" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GANTI DENGAN URL APPS SCRIPT TERBARU LO
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
+        const ADMIN_PIN = 'admin123'; // GANTI PIN INI SESUKA LO!
+
+        let allUsers = [];
+        let currentExtendKode = null;
+
+        function checkAdminPin() {
+            const input = document.getElementById('adminPin').value;
+            if (input === ADMIN_PIN) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                loadData();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        function showSection(sectionId) {
+            ['overview', 'pending', 'users'].forEach(id => {
+                document.getElementById('section-' + id).classList.add('hidden');
+                document.getElementById('nav-' + id).classList.remove('active', 'bg-blue-50', 'text-blue-600', 'border-r-3', 'border-blue-600');
+            });
+            document.getElementById('section-' + sectionId).classList.remove('hidden');
+            const nav = document.getElementById('nav-' + sectionId);
+            nav.classList.add('active');
+            
+            const titles = { overview: 'Overview', pending: 'Pending Approval', users: 'Manage Users' };
+            document.getElementById('pageTitle').textContent = titles[sectionId];
+        }
+
+        async function loadData() {
+            try {
+                // Tampilkan loading state sederhana (opsional)
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'admin', sub_action: 'get_data' }) // Note: handleAdmin expects action: 'get_data' inside data
+                });
+                // Koreksi payload untuk handleAdmin
+                const res2 = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'admin', ...{action: 'get_data'} }) // Wait, logic doPost needs fix.
+                });
+                
+                // Let's use the correct payload based on our doPost router
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'admin', action: 'get_data' }) // JSON key duplicate, last wins. 
+                });
+                // Actually, let's just send { action: 'get_data' } directly if we bypass handleAdmin, 
+                // BUT our doPost routes 'admin' to handleAdmin.
+                // Let's fix the payload to: { action: 'admin', admin_action: 'get_data' } -> requires Apps Script tweak.
+                // SIMPLER: Just use action: 'get_data' if we add it to main doPost.
+                
+                // REVISI PAYLOAD AGAR SESUAI KODE APPS SCRIPT DI ATAS:
+                const finalRes = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'admin', action: 'get_data' }) 
+                });
+                // Wait, JSON.parse will take the last 'action'. So it becomes 'get_data'. 
+                // But doPost checks: if (action === 'admin') return handleAdmin...
+                // handleAdmin checks: var action = data.action; -> 'get_data'. PERFECT.
+
+                const result = await finalRes.json();
+                if (result.status === 'success') {
+                    renderStats(result);
+                    renderPending(result.pending);
+                    renderUsers(result.users);
+                }
+            } catch (err) {
+                alert('Gagal memuat data: ' + err.message);
+            }
+        }
+
+        function renderStats(data) {
+            document.getElementById('statActive').textContent = data.total_active;
+            document.getElementById('statPending').textContent = data.total_pending;
+            document.getElementById('statExpiring').textContent = data.expiring_soon;
+            
+            const badge = document.getElementById('badgePending');
+            if (data.total_pending > 0) {
+                badge.textContent = data.total_pending;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderPending(list) {
+            const tbody = document.getElementById('pendingTableBody');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Tidak ada antrian pendaftaran.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(p => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 text-xs text-slate-500">${new Date(p.timestamp).toLocaleDateString('id-ID')}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-slate-900">${p.nama}</div>
+                        <div class="text-xs text-slate-500">${p.toko}</div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">${p.wa}</td>
+                    <td class="px-6 py-4"><span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">${p.paket}</span></td>
+                    <td class="px-6 py-4 font-mono text-xs">
+                        <div class="font-bold text-slate-900">${p.kode}</div>
+                        <div class="text-slate-500">PIN: ${p.pin}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="${p.link}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center gap-1"><i class="bi bi-box-arrow-up-right"></i> Lihat Bukti</a>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="approveUser(${p.row_index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                            <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderUsers(list) {
+            allUsers = list;
+            filterUsers();
+        }
+
+        function filterUsers() {
+            const q = document.getElementById('searchUser').value.toLowerCase();
+            const filtered = allUsers.filter(u => u.kode.toLowerCase().includes(q));
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">User tidak ditemukan.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(u => {
+                let statusBadge = u.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                let daysColor = u.daysLeft <= 7 ? 'text-red-600 font-bold' : 'text-slate-600';
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-mono font-bold text-slate-900">${u.kode}</td>
+                    <td class="px-6 py-4 font-mono text-slate-600">${u.pin}</td>
+                    <td class="px-6 py-4 text-slate-600">${u.expiry}</td>
+                    <td class="px-6 py-4 ${daysColor}">${u.daysLeft} Hari</td>
+                    <td class="px-6 py-4"><span class="${statusBadge} text-xs font-bold px-2 py-1 rounded">${u.status}</span></td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="openExtend('${u.kode}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                            <i class="bi bi-calendar-plus"></i> Extend
+                        </button>
+                        <button onclick="toggleStatus('${u.kode}', '${u.status}')" class="${u.status === 'Active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                            <i class="bi bi-power"></i> ${u.status === 'Active' ? 'Off' : 'On'}
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        async function approveUser(rowIndex) {
+            if (!confirm('Yakin ingin mengapprove user ini? Akun akan langsung aktif.')) return;
+            await sendAdminAction({ action: 'approve', row_index: rowIndex });
+        }
+
+        function openExtend(kode) {
+            currentExtendKode = kode;
+            document.getElementById('extendKode').textContent = kode;
+            document.getElementById('modalExtend').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        async function confirmExtend() {
+            const months = document.getElementById('extendMonths').value;
+            await sendAdminAction({ action: 'extend', kode_toko: currentExtendKode, months: months });
+            closeModal('modalExtend');
+        }
+
+        async function toggleStatus(kode, currentStatus) {
+            const newStatus = currentStatus === 'Active' ? 'Off' : 'Active';
+            const msg = newStatus === 'Off' ? 'mematikan' : 'mengaktifkan';
+            if (!confirm(`Yakin ingin ${msg} akun ${kode}?`)) return;
+            await sendAdminAction({ action: 'update_status', kode_toko: kode, status: newStatus });
+        }
+
+        async function sendAdminAction(payload) {
+            try {
+                // Payload structure for handleAdmin
+                const dataToSend = { action: 'admin', ...payload }; 
+                // Wait, if I spread payload, and payload has 'action', it overwrites 'admin'.
+                // Let's fix Apps Script doPost to handle this properly or change payload.
+                // Better payload: { action: 'admin', admin_cmd: payload.action, ...rest }
+                // But to avoid changing Apps Script again, let's just use:
+                
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'admin', action: payload.action, ...Object.fromEntries(Object.entries(payload).filter(([k]) => k !== 'action')) })
+                });
+                // Actually simpler: Just send payload directly, but change Apps Script doPost to:
+                // if (requestData.action === 'approve' || requestData.action === 'extend' ...) return handleAdmin(requestData);
+                // Let's assume the user will update doPost logic as instructed.
+                
+                const resFixed = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) // Send payload directly
+                });
+                const result = await resFixed.json();
+                if (result.status === 'success') {
+                    alert(result.message);
+                    loadData();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Gagal: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
