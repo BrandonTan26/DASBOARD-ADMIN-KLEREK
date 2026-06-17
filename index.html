@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Pro v4.0 - Owner Dashboard</title>
+    <title>Owner Dashboard v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -33,6 +33,9 @@
         .dark .card-hover:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast { animation: slideIn 0.3s ease; }
+        /* Chart container normal size */
+        .chart-container { position: relative; height: 220px; width: 100%; }
+        .chart-container-small { position: relative; height: 180px; width: 100%; max-width: 400px; margin: 0 auto; }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
@@ -44,7 +47,7 @@
                 <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
                     <i class="bi bi-shield-lock-fill text-white"></i>
                 </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Admin Access</h2>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Owner Access</h2>
                 <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Masukkan PIN Administrator</p>
             </div>
             <input type="password" id="adminPin" class="w-full px-6 py-4 rounded-2xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-blue-500 outline-none mb-4 text-center text-2xl tracking-widest transition" placeholder="••••••">
@@ -65,8 +68,8 @@
                         <i class="bi bi-speedometer2 text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Klerek <span class="text-blue-600 dark:text-blue-400">Pro</span></h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Admin Dashboard v4.0</p>
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Owner <span class="text-blue-600 dark:text-blue-400">Dashboard</span></h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Control Center v4.0</p>
                     </div>
                 </div>
             </div>
@@ -170,14 +173,19 @@
                     </div>
                 </div>
 
+                <!-- Charts NORMAL SIZE -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                         <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">User Growth</h3>
-                        <canvas id="userGrowthChart" height="250"></canvas>
+                        <div class="chart-container">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                         <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Revenue Distribution</h3>
-                        <canvas id="revenueChart" height="250"></canvas>
+                        <div class="chart-container-small">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -270,6 +278,7 @@
                     </div>
                 </div>
 
+                <!-- Month-over-Month -->
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                     <h3 class="font-bold text-xl text-slate-900 dark:text-white mb-6">
                         <i class="bi bi-graph-up-arrow text-blue-600 mr-2"></i>Month-over-Month Comparison
@@ -312,12 +321,16 @@
                         </div>
                     </div>
                     
+                    <!-- Revenue Trend Chart NORMAL SIZE -->
                     <div class="mt-6">
                         <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-4">Revenue Trend (6 Bulan Terakhir)</h4>
-                        <canvas id="revenueTrendChart" height="100"></canvas>
+                        <div class="chart-container">
+                            <canvas id="revenueTrendChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
+                <!-- User Acquisition & Package Breakdown -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                         <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">
@@ -342,14 +355,23 @@
                             </div>
                         </div>
                         
-                        <canvas id="userAcquisitionChart" height="200" class="mt-6"></canvas>
+                        <!-- User Acquisition Chart NORMAL SIZE -->
+                        <div class="mt-6">
+                            <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-4 text-sm">New Users Trend</h4>
+                            <div class="chart-container">
+                                <canvas id="userAcquisitionChart"></canvas>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                         <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">
                             <i class="bi bi-pie-chart text-purple-600 mr-2"></i>Revenue by Package
                         </h3>
-                        <canvas id="packageRevenueChart" height="250"></canvas>
+                        <!-- Package Revenue Chart NORMAL SIZE -->
+                        <div class="chart-container-small">
+                            <canvas id="packageRevenueChart"></canvas>
+                        </div>
                         <div id="packageStats" class="mt-4 space-y-2">
                         </div>
                     </div>
@@ -404,7 +426,7 @@
                 document.getElementById('loginOverlay').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
                 loadData();
-                showToast('Selamat datang di Admin Dashboard!', 'success');
+                showToast('Selamat datang di Owner Dashboard!', 'success');
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
                 showToast('PIN salah! Silakan coba lagi.', 'error');
@@ -752,7 +774,7 @@
             packageRevenueChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['1 Bulan (Rp 40k)', '3 Bulan (Rp 105k)', '6 Bulan (Rp 180k)'],
+                    labels: ['1 Bulan', '3 Bulan', '6 Bulan'],
                     datasets: [{
                         data: [total1Bulan, total3Bulan, total6Bulan],
                         backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981'],
