@@ -566,35 +566,40 @@
         }
 
         function renderPending(list) {
-            const tbody = document.getElementById('pendingTableBody');
-            if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400 dark:text-slate-500">Tidak ada antrian pendaftaran.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = list.map(p => `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
-                    <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">${new Date(p.timestamp).toLocaleDateString('id-ID')}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-semibold text-slate-900 dark:text-white">${p.nama}</div>
-                        <div class="text-xs text-slate-500 dark:text-slate-400">${p.toko}</div>
-                    </td>
-                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${p.wa}</td>
-                    <td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-full">${p.paket}</span></td>
-                    <td class="px-6 py-4 font-mono text-xs">
-                        <div class="font-bold text-slate-900 dark:text-white">${p.kode}</div>
-                        <div class="text-slate-500 dark:text-slate-400">PIN: ${p.pin}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <a href="${p.link}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center gap-1"><i class="bi bi-box-arrow-up-right"></i> Lihat</a>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="approveUser(${p.row_index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
-                            <i class="bi bi-check-lg mr-1"></i> Approve
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+    const tbody = document.getElementById('pendingTableBody');
+    if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-slate-400 dark:text-slate-500">Tidak ada antrian pendaftaran.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = list.map(p => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+            <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">${new Date(p.timestamp).toLocaleDateString('id-ID')}</td>
+            <td class="px-6 py-4">
+                <div class="font-semibold text-slate-900 dark:text-white">${p.nama}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">${p.toko}</div>
+            </td>
+            <td class="px-6 py-4">
+                <a href="mailto:${p.email}" class="text-blue-600 hover:underline text-xs flex items-center gap-1">
+                    <i class="bi bi-envelope"></i> ${p.email}
+                </a>
+            </td>
+            <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${p.wa}</td>
+            <td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-full">${p.paket}</span></td>
+            <td class="px-6 py-4 font-mono text-xs">
+                <div class="font-bold text-slate-900 dark:text-white">${p.kode}</div>
+                <div class="text-slate-500 dark:text-slate-400">PIN: ${p.pin}</div>
+            </td>
+            <td class="px-6 py-4">
+                <a href="${p.link}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center gap-1"><i class="bi bi-box-arrow-up-right"></i> Lihat</a>
+            </td>
+            <td class="px-6 py-4 text-right">
+                <button onclick="approveUser(${p.row_index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
+                    <i class="bi bi-check-lg mr-1"></i> Approve
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
 
         function renderUsers(list) {
             filterUsers();
