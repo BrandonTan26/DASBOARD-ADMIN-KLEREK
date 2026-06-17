@@ -1,113 +1,197 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Klerek</title>
+    <title>Admin Pro v4.0 - Owner Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .sidebar-link.active { background-color: #eff6ff; color: #2563eb; border-right: 3px solid #2563eb; }
+        .sidebar-link.active { background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%); color: #2563eb; border-right: 3px solid #2563eb; }
+        .dark .sidebar-link.active { background: linear-gradient(90deg, #1e3a8a 0%, #1e293b 100%); color: #60a5fa; border-right: 3px solid #60a5fa; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .dark .card-hover:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast { animation: slideIn 0.3s ease; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <!-- Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"><i class="bi bi-shield-lock-fill"></i></div>
-                <h2 class="text-2xl font-bold">Admin Access Only</h2>
-                <p class="text-slate-500 text-sm">Masukkan PIN Administrator</p>
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
+                    <i class="bi bi-shield-lock-fill text-white"></i>
+                </div>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Admin Access</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Masukkan PIN Administrator</p>
             </div>
-            <input type="password" id="adminPin" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 outline-none mb-4 text-center text-xl tracking-widest" placeholder="••••••">
-            <button onclick="checkAdminPin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">Masuk Dashboard</button>
-            <p id="loginError" class="text-red-500 text-sm text-center mt-3 hidden">PIN Salah!</p>
+            <input type="password" id="adminPin" class="w-full px-6 py-4 rounded-2xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-blue-500 outline-none mb-4 text-center text-2xl tracking-widest transition" placeholder="••••••">
+            <button onclick="checkAdminPin()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 rounded-2xl transition transform hover:scale-[1.02] shadow-lg">
+                <i class="bi bi-box-arrow-in-right mr-2"></i> Masuk Dashboard
+            </button>
+            <p id="loginError" class="text-red-500 text-sm text-center mt-4 hidden"><i class="bi bi-exclamation-circle mr-1"></i> PIN Salah!</p>
         </div>
     </div>
 
     <!-- Main App -->
     <div id="mainApp" class="hidden min-h-screen flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-slate-200 fixed h-full flex flex-col">
-            <div class="p-6 border-b border-slate-100">
-                <h1 class="text-xl font-bold text-slate-900">Klerek <span class="text-blue-600">Admin</span></h1>
-                <p class="text-xs text-slate-500 mt-1">Control Center v1.0</p>
+        <aside class="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 fixed h-full flex flex-col shadow-xl z-20">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                        <i class="bi bi-speedometer2 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Klerek <span class="text-blue-600 dark:text-blue-400">Pro</span></h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Admin Dashboard v4.0</p>
+                    </div>
+                </div>
             </div>
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="#" onclick="showSection('overview')" id="nav-overview" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
-                    <i class="bi bi-grid-1x2-fill text-lg"></i> Overview
+            
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-4">Main Menu</div>
+                <a href="#" onclick="showSection('overview')" id="nav-overview" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group">
+                    <i class="bi bi-grid-1x2-fill text-lg group-hover:text-blue-600"></i>
+                    <span class="font-medium">Overview</span>
                 </a>
-                <a href="#" onclick="showSection('pending')" id="nav-pending" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
-                    <i class="bi bi-hourglass-split text-lg"></i> Pending Approval
-                    <span id="badgePending" class="ml-auto bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 rounded-full hidden">0</span>
+                <a href="#" onclick="showSection('pending')" id="nav-pending" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group">
+                    <i class="bi bi-hourglass-split text-lg group-hover:text-orange-600"></i>
+                    <span class="font-medium">Pending Approval</span>
+                    <span id="badgePending" class="ml-auto bg-orange-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full hidden">0</span>
                 </a>
-                <a href="#" onclick="showSection('users')" id="nav-users" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition">
-                    <i class="bi bi-people-fill text-lg"></i> Manage Users
+                <a href="#" onclick="showSection('users')" id="nav-users" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group">
+                    <i class="bi bi-people-fill text-lg group-hover:text-green-600"></i>
+                    <span class="font-medium">Manage Users</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6">Analytics</div>
+                <a href="#" onclick="showSection('revenue')" id="nav-revenue" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group">
+                    <i class="bi bi-currency-dollar text-lg group-hover:text-green-600"></i>
+                    <span class="font-medium">Revenue</span>
                 </a>
             </nav>
-            <div class="p-4 border-t border-slate-100">
-                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition text-sm font-semibold">
+            
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm font-medium">
+                    <span><i class="bi bi-moon-stars mr-2"></i> Dark Mode</span>
+                    <div class="w-10 h-6 bg-slate-300 dark:bg-blue-600 rounded-full relative transition">
+                        <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition transform translate-x-0 dark:translate-x-4"></div>
+                    </div>
+                </button>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition text-sm font-semibold">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </button>
             </div>
         </aside>
 
         <!-- Content -->
-        <main class="flex-1 ml-64 p-8">
-            <!-- Header -->
-            <header class="flex justify-between items-center mb-8">
+        <main class="flex-1 ml-72 p-8">
+            <!-- Top Bar -->
+            <header class="flex justify-between items-center mb-8 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
                 <div>
-                    <h2 id="pageTitle" class="text-2xl font-bold text-slate-900">Overview</h2>
-                    <p class="text-slate-500 text-sm">Pantau bisnis sewa dashboard Anda</p>
+                    <h2 id="pageTitle" class="text-3xl font-bold text-slate-900 dark:text-white">Overview</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Pantau dan kelola bisnis sewa dashboard Anda</p>
                 </div>
-                <button onclick="loadData()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh Data
-                </button>
+                <div class="flex items-center gap-4">
+                    <button onclick="loadData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-blue-500/30">
+                        <i class="bi bi-arrow-clockwise"></i> <span class="hidden sm:inline">Refresh Data</span>
+                    </button>
+                </div>
             </header>
 
             <!-- SECTION: OVERVIEW -->
             <div id="section-overview" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm card-hover">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-people-fill"></i></div>
-                            <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">Active</span>
+                            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">
+                                <i class="bi bi-people-fill text-white"></i>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">Active</span>
                         </div>
-                        <h3 class="text-slate-500 text-sm font-medium">Total User Aktif</h3>
-                        <p id="statActive" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                        <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total User Aktif</h3>
+                        <p id="statActive" class="text-4xl font-bold text-slate-900 dark:text-white mt-2">0</p>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm card-hover">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-hourglass-split"></i></div>
-                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">Pending</span>
+                            <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-orange-500/30">
+                                <i class="bi bi-hourglass-split text-white"></i>
+                            </div>
+                            <span class="text-xs font-bold text-orange-600 bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full">Pending</span>
                         </div>
-                        <h3 class="text-slate-500 text-sm font-medium">Menunggu Persetujuan</h3>
-                        <p id="statPending" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                        <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium">Menunggu Persetujuan</h3>
+                        <p id="statPending" class="text-4xl font-bold text-slate-900 dark:text-white mt-2">0</p>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm card-hover">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center text-2xl"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                            <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded">Alert</span>
+                            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-red-500/30">
+                                <i class="bi bi-exclamation-triangle-fill text-white"></i>
+                            </div>
+                            <span class="text-xs font-bold text-red-600 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full">Alert</span>
                         </div>
-                        <h3 class="text-slate-500 text-sm font-medium">Segera Expired (< 7 Hari)</h3>
-                        <p id="statExpiring" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+                        <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium">Segera Expired</h3>
+                        <p id="statExpiring" class="text-4xl font-bold text-slate-900 dark:text-white mt-2">0</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-green-500/30">
+                                <i class="bi bi-currency-dollar text-white"></i>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">Revenue</span>
+                        </div>
+                        <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pendapatan Bulan Ini</h3>
+                        <p id="statRevenue" class="text-4xl font-bold text-slate-900 dark:text-white mt-2">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">User Growth</h3>
+                        <canvas id="userGrowthChart" height="250"></canvas>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Revenue Distribution</h3>
+                        <canvas id="revenueChart" height="250"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- SECTION: PENDING -->
             <div id="section-pending" class="hidden space-y-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-slate-100">
-                        <h3 class="font-bold text-lg">Antrian Pendaftaran Baru</h3>
-                        <p class="text-sm text-slate-500">Cek bukti transfer dan approve user baru</p>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-xl text-slate-900 dark:text-white">Antrian Pendaftaran Baru</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Cek bukti transfer dan approve user baru</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-50 text-slate-600 font-semibold">
+                            <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 font-semibold">
                                 <tr>
                                     <th class="px-6 py-4">Tanggal</th>
                                     <th class="px-6 py-4">Nama / Toko</th>
@@ -118,8 +202,7 @@
                                     <th class="px-6 py-4 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="pendingTableBody" class="divide-y divide-slate-100">
-                                <!-- Data injected here -->
+                            <tbody id="pendingTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
                             </tbody>
                         </table>
                     </div>
@@ -128,17 +211,24 @@
 
             <!-- SECTION: USERS -->
             <div id="section-users" class="hidden space-y-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <h3 class="font-bold text-lg">Database User Sewa</h3>
-                            <p class="text-sm text-slate-500">Kelola masa aktif dan status user</p>
+                            <h3 class="font-bold text-xl text-slate-900 dark:text-white">Database User Sewa</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola masa aktif dan status user</p>
                         </div>
-                        <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Cari Kode Toko..." class="px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Cari Kode Toko..." class="px-4 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 flex-1 sm:flex-none">
+                            <select id="filterStatus" onchange="filterUsers()" class="px-4 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-xl text-sm outline-none focus:border-blue-500">
+                                <option value="">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Off">Off</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-50 text-slate-600 font-semibold">
+                            <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 font-semibold">
                                 <tr>
                                     <th class="px-6 py-4">Kode Toko</th>
                                     <th class="px-6 py-4">PIN</th>
@@ -148,40 +238,165 @@
                                     <th class="px-6 py-4 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersTableBody" class="divide-y divide-slate-100">
-                                <!-- Data injected here -->
+                            <tbody id="usersTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: REVENUE -->
+            <div id="section-revenue" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-white">
+                        <h3 class="text-green-100 text-sm font-medium">Total Pendapatan (All Time)</h3>
+                        <p id="totalRevenue" class="text-4xl font-bold mt-2">Rp 0</p>
+                        <p class="text-green-100 text-xs mt-2">Dari semua paket yang approved</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+                        <h3 class="text-blue-100 text-sm font-medium">Rata-rata per User</h3>
+                        <p id="avgPerUser" class="text-3xl font-bold mt-2">Rp 0</p>
+                        <p class="text-blue-100 text-xs mt-2">Average Revenue Per User</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-2xl shadow-lg text-white">
+                        <h3 class="text-purple-100 text-sm font-medium">Target Bulan Ini</h3>
+                        <p id="targetPercent" class="text-3xl font-bold mt-2">0%</p>
+                        <p id="targetAmount" class="text-purple-100 text-xs mt-2">Rp 0 / Rp 3.000.000</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-2xl shadow-lg text-white">
+                        <h3 class="text-orange-100 text-sm font-medium">Projected Revenue</h3>
+                        <p id="projectedRevenue" class="text-3xl font-bold mt-2">Rp 0</p>
+                        <p class="text-orange-100 text-xs mt-2">Dari pending approvals</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                    <h3 class="font-bold text-xl text-slate-900 dark:text-white mb-6">
+                        <i class="bi bi-graph-up-arrow text-blue-600 mr-2"></i>Month-over-Month Comparison
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-100">Bulan Ini</h4>
+                                <span class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">Current</span>
+                            </div>
+                            <p id="thisMonthRevenue" class="text-3xl font-bold text-blue-700 dark:text-blue-400">Rp 0</p>
+                            <p id="thisMonthUsers" class="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                                <i class="bi bi-people mr-1"></i>0 new users
+                            </p>
+                        </div>
+                        
+                        <div class="bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Bulan Lalu</h4>
+                                <span class="bg-slate-400 text-white text-xs font-bold px-2 py-1 rounded">Previous</span>
+                            </div>
+                            <p id="lastMonthRevenue" class="text-3xl font-bold text-slate-700 dark:text-slate-300">Rp 0</p>
+                            <p id="lastMonthUsers" class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                                <i class="bi bi-people mr-1"></i>0 new users
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-green-900 dark:text-green-100">Growth</h4>
+                                <span id="growthBadge" class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                    <i class="bi bi-arrow-up"></i> UP
+                                </span>
+                            </div>
+                            <p id="revenueGrowth" class="text-2xl font-bold text-green-700 dark:text-green-400">+Rp 0</p>
+                            <p id="revenueGrowthPercent" class="text-lg font-bold text-green-600 dark:text-green-400 mt-1">
+                                +0.0%
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-4">Revenue Trend (6 Bulan Terakhir)</h4>
+                        <canvas id="revenueTrendChart" height="100"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">
+                            <i class="bi bi-person-plus text-green-600 mr-2"></i>User Acquisition
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">New Users Bulan Ini</span>
+                                <span id="newUsersThisMonth" class="text-lg font-bold text-green-600 dark:text-green-400">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">New Users Bulan Lalu</span>
+                                <span id="newUsersLastMonth" class="text-lg font-bold text-slate-700 dark:text-slate-300">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">User Growth</span>
+                                <span id="userGrowthPercent" class="text-lg font-bold text-blue-600 dark:text-blue-400">0%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">Conversion Rate</span>
+                                <span id="conversionRate" class="text-lg font-bold text-purple-600 dark:text-purple-400">0%</span>
+                            </div>
+                        </div>
+                        
+                        <canvas id="userAcquisitionChart" height="200" class="mt-6"></canvas>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">
+                            <i class="bi bi-pie-chart text-purple-600 mr-2"></i>Revenue by Package
+                        </h3>
+                        <canvas id="packageRevenueChart" height="250"></canvas>
+                        <div id="packageStats" class="mt-4 space-y-2">
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal Extend -->
-    <div id="modalExtend" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 class="font-bold text-lg mb-4">Perpanjang Masa Sewa</h3>
-            <p class="text-sm text-slate-500 mb-4">User: <span id="extendKode" class="font-mono font-bold text-slate-900"></span></p>
-            <select id="extendMonths" class="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 outline-none">
+    <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3"></div>
+
+    <div id="modalExtend" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-700 shadow-2xl">
+            <h3 class="font-bold text-xl text-slate-900 dark:text-white mb-4">Perpanjang Masa Sewa</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">User: <span id="extendKode" class="font-mono font-bold text-slate-900 dark:text-white"></span></p>
+            <select id="extendMonths" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-xl mb-4 outline-none focus:border-blue-500">
                 <option value="1">Tambah 1 Bulan</option>
                 <option value="3">Tambah 3 Bulan</option>
                 <option value="6">Tambah 6 Bulan</option>
             </select>
             <div class="flex gap-3">
-                <button onclick="closeModal('modalExtend')" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50">Batal</button>
-                <button onclick="confirmExtend()" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">Simpan</button>
+                <button onclick="closeModal('modalExtend')" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-600 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition">Batal</button>
+                <button onclick="confirmExtend()" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Simpan</button>
             </div>
         </div>
     </div>
 
     <script>
-        // GANTI DENGAN URL APPS SCRIPT TERBARU LO
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
-        const ADMIN_PIN = 'admin123'; // GANTI PIN INI SESUKA LO!
-
+        const ADMIN_PIN = 'admin123';
+        
         let allUsers = [];
+        let allPending = [];
         let currentExtendKode = null;
+        let userGrowthChartInstance = null;
+        let revenueChartInstance = null;
+        let revenueTrendChartInstance = null;
+        let userAcquisitionChartInstance = null;
+        let packageRevenueChartInstance = null;
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
 
         function checkAdminPin() {
             const input = document.getElementById('adminPin').value;
@@ -189,8 +404,10 @@
                 document.getElementById('loginOverlay').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
                 loadData();
+                showToast('Selamat datang di Admin Dashboard!', 'success');
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
+                showToast('PIN salah! Silakan coba lagi.', 'error');
             }
         }
 
@@ -199,69 +416,56 @@
         }
 
         function showSection(sectionId) {
-            ['overview', 'pending', 'users'].forEach(id => {
+            ['overview', 'pending', 'users', 'revenue'].forEach(id => {
                 document.getElementById('section-' + id).classList.add('hidden');
-                document.getElementById('nav-' + id).classList.remove('active', 'bg-blue-50', 'text-blue-600', 'border-r-3', 'border-blue-600');
+                document.getElementById('nav-' + id).classList.remove('active');
             });
             document.getElementById('section-' + sectionId).classList.remove('hidden');
-            const nav = document.getElementById('nav-' + sectionId);
-            nav.classList.add('active');
+            document.getElementById('nav-' + sectionId).classList.add('active');
             
-            const titles = { overview: 'Overview', pending: 'Pending Approval', users: 'Manage Users' };
+            const titles = { 
+                overview: 'Overview', 
+                pending: 'Pending Approval', 
+                users: 'Manage Users',
+                revenue: 'Revenue Analytics'
+            };
             document.getElementById('pageTitle').textContent = titles[sectionId];
         }
 
         async function loadData() {
             try {
-                // Tampilkan loading state sederhana (opsional)
-                const res = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'admin', sub_action: 'get_data' }) // Note: handleAdmin expects action: 'get_data' inside data
-                });
-                // Koreksi payload untuk handleAdmin
-                const res2 = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'admin', ...{action: 'get_data'} }) // Wait, logic doPost needs fix.
-                });
-                
-                // Let's use the correct payload based on our doPost router
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'admin', action: 'get_data' }) // JSON key duplicate, last wins. 
+                    body: JSON.stringify({ action: 'get_data' })
                 });
-                // Actually, let's just send { action: 'get_data' } directly if we bypass handleAdmin, 
-                // BUT our doPost routes 'admin' to handleAdmin.
-                // Let's fix the payload to: { action: 'admin', admin_action: 'get_data' } -> requires Apps Script tweak.
-                // SIMPLER: Just use action: 'get_data' if we add it to main doPost.
+                const result = await response.json();
                 
-                // REVISI PAYLOAD AGAR SESUAI KODE APPS SCRIPT DI ATAS:
-                const finalRes = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'admin', action: 'get_data' }) 
-                });
-                // Wait, JSON.parse will take the last 'action'. So it becomes 'get_data'. 
-                // But doPost checks: if (action === 'admin') return handleAdmin...
-                // handleAdmin checks: var action = data.action; -> 'get_data'. PERFECT.
-
-                const result = await finalRes.json();
                 if (result.status === 'success') {
+                    allUsers = result.users || [];
+                    allPending = result.pending || [];
                     renderStats(result);
-                    renderPending(result.pending);
-                    renderUsers(result.users);
+                    renderPending(allPending);
+                    renderUsers(allUsers);
+                    renderCharts(result);
+                    renderRevenueSection(result);
+                    showToast('Data berhasil dimuat!', 'success');
+                } else {
+                    showToast('Gagal memuat data: ' + result.message, 'error');
                 }
             } catch (err) {
-                alert('Gagal memuat data: ' + err.message);
+                showToast('Gagal memuat data: ' + err.message, 'error');
+                console.error('Error:', err);
             }
         }
 
         function renderStats(data) {
-            document.getElementById('statActive').textContent = data.total_active;
-            document.getElementById('statPending').textContent = data.total_pending;
-            document.getElementById('statExpiring').textContent = data.expiring_soon;
+            document.getElementById('statActive').textContent = data.total_active || 0;
+            document.getElementById('statPending').textContent = data.total_pending || 0;
+            document.getElementById('statExpiring').textContent = data.expiring_soon || 0;
+            
+            var revenue = data.this_month_revenue || 0;
+            document.getElementById('statRevenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
             
             const badge = document.getElementById('badgePending');
             if (data.total_pending > 0) {
@@ -272,31 +476,98 @@
             }
         }
 
+        function renderRevenueSection(data) {
+            document.getElementById('totalRevenue').textContent = 'Rp ' + (data.total_revenue || 0).toLocaleString('id-ID');
+            document.getElementById('avgPerUser').textContent = 'Rp ' + (data.avg_per_user || 0).toLocaleString('id-ID');
+            document.getElementById('targetPercent').textContent = (data.target_percentage || 0) + '%';
+            document.getElementById('targetAmount').textContent = 'Rp ' + (data.this_month_revenue || 0).toLocaleString('id-ID') + 
+                                  ' / Rp ' + (data.target_amount || 3000000).toLocaleString('id-ID');
+            document.getElementById('projectedRevenue').textContent = 'Rp ' + (data.projected_revenue || 0).toLocaleString('id-ID');
+            
+            document.getElementById('thisMonthRevenue').textContent = 'Rp ' + (data.this_month_revenue || 0).toLocaleString('id-ID');
+            document.getElementById('lastMonthRevenue').textContent = 'Rp ' + (data.last_month_revenue || 0).toLocaleString('id-ID');
+            document.getElementById('thisMonthUsers').innerHTML = '<i class="bi bi-people mr-1"></i>' + (data.this_month_new_users || 0) + ' new users';
+            document.getElementById('lastMonthUsers').innerHTML = '<i class="bi bi-people mr-1"></i>' + (data.last_month_new_users || 0) + ' new users';
+            
+            var growth = data.revenue_growth || 0;
+            var growthPercent = data.revenue_growth_percent || 0;
+            var isPositive = growth >= 0;
+            
+            document.getElementById('revenueGrowth').textContent = (isPositive ? '+' : '') + 'Rp ' + Math.abs(growth).toLocaleString('id-ID');
+            document.getElementById('revenueGrowthPercent').textContent = (isPositive ? '+' : '') + growthPercent.toFixed(1) + '%';
+            
+            var growthBadge = document.getElementById('growthBadge');
+            if (isPositive) {
+                growthBadge.className = 'bg-green-500 text-white text-xs font-bold px-2 py-1 rounded';
+                growthBadge.innerHTML = '<i class="bi bi-arrow-up"></i> UP';
+            } else {
+                growthBadge.className = 'bg-red-500 text-white text-xs font-bold px-2 py-1 rounded';
+                growthBadge.innerHTML = '<i class="bi bi-arrow-down"></i> DOWN';
+            }
+            
+            document.getElementById('newUsersThisMonth').textContent = data.this_month_new_users || 0;
+            document.getElementById('newUsersLastMonth').textContent = data.last_month_new_users || 0;
+            document.getElementById('userGrowthPercent').textContent = (data.user_growth_percent >= 0 ? '+' : '') + (data.user_growth_percent || 0).toFixed(1) + '%';
+            document.getElementById('conversionRate').textContent = (data.conversion_rate || 0) + '%';
+            
+            renderPackageStats(data.paket_breakdown);
+            renderRevenueTrendChart(data);
+            renderUserAcquisitionChart(data);
+            renderPackageRevenueChart(data);
+        }
+
+        function renderPackageStats(breakdown) {
+            var total = (breakdown['1 Bulan'] || 0) + (breakdown['3 Bulan'] || 0) + (breakdown['6 Bulan'] || 0);
+            var html = '';
+            
+            var packages = [
+                { name: '1 Bulan', price: 40000, color: 'blue' },
+                { name: '3 Bulan', price: 105000, color: 'purple' },
+                { name: '6 Bulan', price: 180000, color: 'green' }
+            ];
+            
+            packages.forEach(function(pkg) {
+                var count = breakdown[pkg.name] || 0;
+                var percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                var revenue = count * pkg.price;
+                
+                html += '<div class="flex justify-between items-center p-2 bg-' + pkg.color + '-50 dark:bg-' + pkg.color + '-900/20 rounded">';
+                html += '<span class="text-sm text-slate-600 dark:text-slate-400">' + pkg.name + '</span>';
+                html += '<div class="text-right">';
+                html += '<span class="text-sm font-bold text-' + pkg.color + '-600 dark:text-' + pkg.color + '-400">' + count + ' users</span>';
+                html += '<span class="text-xs text-slate-500 ml-2">(' + percent + '%)</span><br>';
+                html += '<span class="text-xs text-slate-500">Rp ' + revenue.toLocaleString('id-ID') + '</span>';
+                html += '</div></div>';
+            });
+            
+            document.getElementById('packageStats').innerHTML = html;
+        }
+
         function renderPending(list) {
             const tbody = document.getElementById('pendingTableBody');
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Tidak ada antrian pendaftaran.</td></tr>';
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400 dark:text-slate-500">Tidak ada antrian pendaftaran.</td></tr>';
                 return;
             }
             tbody.innerHTML = list.map(p => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 text-xs text-slate-500">${new Date(p.timestamp).toLocaleDateString('id-ID')}</td>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                    <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">${new Date(p.timestamp).toLocaleDateString('id-ID')}</td>
                     <td class="px-6 py-4">
-                        <div class="font-semibold text-slate-900">${p.nama}</div>
-                        <div class="text-xs text-slate-500">${p.toko}</div>
+                        <div class="font-semibold text-slate-900 dark:text-white">${p.nama}</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">${p.toko}</div>
                     </td>
-                    <td class="px-6 py-4 text-slate-600">${p.wa}</td>
-                    <td class="px-6 py-4"><span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">${p.paket}</span></td>
+                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${p.wa}</td>
+                    <td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold px-2.5 py-1 rounded-full">${p.paket}</span></td>
                     <td class="px-6 py-4 font-mono text-xs">
-                        <div class="font-bold text-slate-900">${p.kode}</div>
-                        <div class="text-slate-500">PIN: ${p.pin}</div>
+                        <div class="font-bold text-slate-900 dark:text-white">${p.kode}</div>
+                        <div class="text-slate-500 dark:text-slate-400">PIN: ${p.pin}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <a href="${p.link}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center gap-1"><i class="bi bi-box-arrow-up-right"></i> Lihat Bukti</a>
+                        <a href="${p.link}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center gap-1"><i class="bi bi-box-arrow-up-right"></i> Lihat</a>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="approveUser(${p.row_index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                            <i class="bi bi-check-lg"></i> Approve
+                        <button onclick="approveUser(${p.row_index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
+                            <i class="bi bi-check-lg mr-1"></i> Approve
                         </button>
                     </td>
                 </tr>
@@ -304,30 +575,34 @@
         }
 
         function renderUsers(list) {
-            allUsers = list;
             filterUsers();
         }
 
         function filterUsers() {
             const q = document.getElementById('searchUser').value.toLowerCase();
-            const filtered = allUsers.filter(u => u.kode.toLowerCase().includes(q));
-            const tbody = document.getElementById('usersTableBody');
+            const statusFilter = document.getElementById('filterStatus').value;
+            const filtered = (allUsers || []).filter(u => {
+                const matchSearch = u.kode.toLowerCase().includes(q);
+                const matchStatus = !statusFilter || u.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
             
+            const tbody = document.getElementById('usersTableBody');
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">User tidak ditemukan.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400 dark:text-slate-500">User tidak ditemukan.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = filtered.map(u => {
-                let statusBadge = u.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-                let daysColor = u.daysLeft <= 7 ? 'text-red-600 font-bold' : 'text-slate-600';
+                let statusBadge = u.status === 'Active' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+                let daysColor = u.daysLeft <= 7 ? 'text-red-600 font-bold' : 'text-slate-600 dark:text-slate-400';
                 return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 font-mono font-bold text-slate-900">${u.kode}</td>
-                    <td class="px-6 py-4 font-mono text-slate-600">${u.pin}</td>
-                    <td class="px-6 py-4 text-slate-600">${u.expiry}</td>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                    <td class="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white">${u.kode}</td>
+                    <td class="px-6 py-4 font-mono text-slate-600 dark:text-slate-400">${u.pin}</td>
+                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${u.expiry}</td>
                     <td class="px-6 py-4 ${daysColor}">${u.daysLeft} Hari</td>
-                    <td class="px-6 py-4"><span class="${statusBadge} text-xs font-bold px-2 py-1 rounded">${u.status}</span></td>
+                    <td class="px-6 py-4"><span class="${statusBadge} text-xs font-bold px-2.5 py-1 rounded-full">${u.status}</span></td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <button onclick="openExtend('${u.kode}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
                             <i class="bi bi-calendar-plus"></i> Extend
@@ -338,6 +613,172 @@
                     </td>
                 </tr>
             `}).join('');
+        }
+
+        function renderCharts(data) {
+            const ctx1 = document.getElementById('userGrowthChart').getContext('2d');
+            if (userGrowthChartInstance) userGrowthChartInstance.destroy();
+            userGrowthChartInstance = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Total Users',
+                        data: [12, 19, 25, 32, 38, data.total_active || 0],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('revenueChart').getContext('2d');
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            revenueChartInstance = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['1 Bulan', '3 Bulan', '6 Bulan'],
+                    datasets: [{
+                        data: [data.paket_breakdown ? data.paket_breakdown['1 Bulan'] || 0 : 0, 
+                               data.paket_breakdown ? data.paket_breakdown['3 Bulan'] || 0 : 0, 
+                               data.paket_breakdown ? data.paket_breakdown['6 Bulan'] || 0 : 0],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderRevenueTrendChart(data) {
+            const ctx = document.getElementById('revenueTrendChart').getContext('2d');
+            if (revenueTrendChartInstance) revenueTrendChartInstance.destroy();
+            
+            revenueTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.chart_labels || [],
+                    datasets: [{
+                        label: 'Revenue (Rp)',
+                        data: data.monthly_revenue || [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + (value / 1000) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderUserAcquisitionChart(data) {
+            const ctx = document.getElementById('userAcquisitionChart').getContext('2d');
+            if (userAcquisitionChartInstance) userAcquisitionChartInstance.destroy();
+            
+            userAcquisitionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.chart_labels || [],
+                    datasets: [{
+                        label: 'New Users',
+                        data: data.monthly_users || [],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderPackageRevenueChart(data) {
+            const ctx = document.getElementById('packageRevenueChart').getContext('2d');
+            if (packageRevenueChartInstance) packageRevenueChartInstance.destroy();
+            
+            var breakdown = data.paket_breakdown || {};
+            var total1Bulan = (breakdown['1 Bulan'] || 0) * 40000;
+            var total3Bulan = (breakdown['3 Bulan'] || 0) * 105000;
+            var total6Bulan = (breakdown['6 Bulan'] || 0) * 180000;
+            
+            packageRevenueChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['1 Bulan (Rp 40k)', '3 Bulan (Rp 105k)', '6 Bulan (Rp 180k)'],
+                    datasets: [{
+                        data: [total1Bulan, total3Bulan, total6Bulan],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981'],
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.parsed;
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return label + ': Rp ' + value.toLocaleString('id-ID') + ' (' + percent + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         async function approveUser(rowIndex) {
@@ -370,38 +811,51 @@
 
         async function sendAdminAction(payload) {
             try {
-                // Payload structure for handleAdmin
-                const dataToSend = { action: 'admin', ...payload }; 
-                // Wait, if I spread payload, and payload has 'action', it overwrites 'admin'.
-                // Let's fix Apps Script doPost to handle this properly or change payload.
-                // Better payload: { action: 'admin', admin_cmd: payload.action, ...rest }
-                // But to avoid changing Apps Script again, let's just use:
-                
-                const res = await fetch(APPS_SCRIPT_URL, {
+                const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'admin', action: payload.action, ...Object.fromEntries(Object.entries(payload).filter(([k]) => k !== 'action')) })
+                    body: JSON.stringify(payload)
                 });
-                // Actually simpler: Just send payload directly, but change Apps Script doPost to:
-                // if (requestData.action === 'approve' || requestData.action === 'extend' ...) return handleAdmin(requestData);
-                // Let's assume the user will update doPost logic as instructed.
-                
-                const resFixed = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) // Send payload directly
-                });
-                const result = await resFixed.json();
+                const result = await response.json();
                 if (result.status === 'success') {
-                    alert(result.message);
+                    showToast(result.message, 'success');
                     loadData();
                 } else {
-                    alert('Error: ' + result.message);
+                    showToast('Error: ' + result.message, 'error');
                 }
             } catch (err) {
-                alert('Gagal: ' + err.message);
+                showToast('Gagal: ' + err.message, 'error');
             }
         }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-orange-500',
+                info: 'bg-blue-500'
+            };
+            const icons = {
+                success: 'bi-check-circle',
+                error: 'bi-x-circle',
+                warning: 'bi-exclamation-triangle',
+                info: 'bi-info-circle'
+            };
+            
+            toast.className = `toast ${colors[type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px]`;
+            toast.innerHTML = `<i class="bi ${icons[type]} text-xl"></i><span class="font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        document.getElementById('adminPin')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAdminPin();
+        });
     </script>
 </body>
 </html>
